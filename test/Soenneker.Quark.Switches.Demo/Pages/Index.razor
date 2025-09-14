@@ -2,6 +2,8 @@
 @using Soenneker.Quark.Switches
 @using Soenneker.Quark.Enums.Colors
 @using Soenneker.Quark.Enums.Size
+@using Soenneker.Quark.Validations
+@using Soenneker.Quark.Validations.Enums
 
 <Div class="container mt-4">
     <Div class="row">
@@ -172,6 +174,28 @@
         </Div>
     </Div>
 
+    <!-- Validation (Data Annotations) -->
+    <Div class="row mb-4">
+        <Div class="col-12">
+            <Label style="font-size: 1.5rem; font-weight: bold;">Validation</Label>
+            <Div class="card">
+                <Div class="card-body">
+                    <Validations @ref="_validations" Model="_validationModel" ValidateOnLoad="true">
+                        <Validation @ref="_acceptValidation">
+                            <Switch Label="I accept the Terms and Conditions"
+                                    @bind-Checked="_validationModel.AcceptTerms"
+                                    />
+
+                            <ValidationError Class="mt-2" />
+                        </Validation>
+
+                        <button type="button" class="btn btn-primary mt-3" @onclick="ValidateValidationModel">Validate</button>
+                    </Validations>
+                </Div>
+            </Div>
+        </Div>
+    </Div>
+
     <!-- Interactive Demo -->
     <Div class="row mb-4">
         <Div class="col-12">
@@ -254,5 +278,22 @@
         public bool EmailNotifications { get; set; } = true;
         public bool SmsNotifications { get; set; } = false;
         public bool MarketingEmails { get; set; } = false;
+    }
+
+    // Validation demo
+    private Validations? _validations;
+    private Validation? _acceptValidation;
+    private readonly ValidationFormModel _validationModel = new();
+
+    public sealed class ValidationFormModel
+    {
+        [System.ComponentModel.DataAnnotations.Range(typeof(bool), "true", "true", ErrorMessage = "You must accept the terms.")]
+        public bool AcceptTerms { get; set; }
+    }
+
+    private async Task ValidateValidationModel()
+    {
+        if (_validations is not null)
+            await _validations.Validate();
     }
 }
