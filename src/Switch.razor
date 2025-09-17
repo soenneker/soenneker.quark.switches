@@ -1,25 +1,26 @@
-@using Microsoft.AspNetCore.Components.Web
 @using Soenneker.Extensions.String
-@using Soenneker.Quark.Enums.Colors
 @using Soenneker.Quark.Enums.Size
 @using Soenneker.Quark.Validations
 @using Soenneker.Quark.Validations.Enums
 @using System.Linq.Expressions
+@using Soenneker.Blazor.Extensions.EventCallback
 @using Soenneker.Quark.Labels
 @using Soenneker.Quark.Divs
+@using Soenneker.Quark.Dtos.Colors
 
 @inherits Soenneker.Quark.Components.Element
 @implements Soenneker.Quark.Validations.Abstract.IValidationInput
 
-<Div Class="form-check form-switch" @attributes="BuildWrapperAttributes()">
+<Div Class="form-check form-switch" @attributes="BuildWrapperAttributes()" >
     <input type="checkbox" @attributes="BuildInputAttributes()" />
     @if (Label.HasContent())
     {
-        <Label Class="form-check-label">@Label</Label>
+        <Label Class="form-check-label" >@Label</Label>
     }
 </Div>
 
 @code {
+
     [Parameter]
     public bool Checked { get; set; }
 
@@ -41,30 +42,33 @@
     [Parameter]
     public EventCallback<ChangeEventArgs> OnChange { get; set; }
 
-	[CascadingParameter]
-	public Validation? ParentValidation { get; set; }
+    [CascadingParameter]
+    public Validation? ParentValidation { get; set; }
 
-	[Parameter]
-	public Expression<Func<bool>>? CheckedExpression { get; set; }
+    [Parameter]
+    public Expression<Func<bool>>? CheckedExpression { get; set; }
 
-	public object? ValidationValue => Checked;
+    public object? ValidationValue => Checked;
 
-	protected override async Task OnAfterRenderAsync(bool firstRender)
-	{
-		if (firstRender && ParentValidation is not null)
-		{
-			if (CheckedExpression is not null)
-				await ParentValidation.InitializeInputExpression(CheckedExpression);
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && ParentValidation is not null)
+        {
+            if (CheckedExpression is not null)
+                await ParentValidation.InitializeInputExpression(CheckedExpression);
 
-			await ParentValidation.InitializeInput(this);
-		}
+            await ParentValidation.InitializeInput(this);
+        }
 
-		await base.OnAfterRenderAsync(firstRender);
-	}
+        await base.OnAfterRenderAsync(firstRender);
+    }
 
     private string? GetColorClass()
     {
-        return $"form-check-input-{Color.Value}";
+        if (Color.IsTheme)
+            return $"form-check-input-{Color.Theme!.Value}";
+
+        return null;
     }
 
     private string? GetSizeClass()
@@ -115,7 +119,7 @@
     {
         if (ParentValidation?.Status == ValidationStatus.Error)
             return "is-invalid";
-        else if (ParentValidation?.Status == ValidationStatus.Success)
+        if (ParentValidation?.Status == ValidationStatus.Success)
             return "is-valid";
 
         return null;
@@ -126,11 +130,10 @@
         if (e.Value is bool value)
         {
             Checked = value;
-            await CheckedChanged.InvokeAsync(Checked);
+            await CheckedChanged.InvokeIfHasDelegate(Checked);
         }
 
-        if (OnChange.HasDelegate)
-            await OnChange.InvokeAsync(e);
+        await OnChange.InvokeIfHasDelegate(e);
 
         if (ParentValidation is not null)
             await ParentValidation.NotifyInputChanged(Checked);
