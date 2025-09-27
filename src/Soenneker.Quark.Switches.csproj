@@ -44,6 +44,6 @@
 
     <ItemGroup>
         <PackageReference Include="Soenneker.Quark.Labels" Version="3.0.23" />
-        <PackageReference Include="Soenneker.Quark.Validations" Version="3.0.20" />
+        <PackageReference Include="Soenneker.Quark.Validations" Version="3.0.21" />
     </ItemGroup>
 </Project>
