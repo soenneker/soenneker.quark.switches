@@ -32,7 +32,7 @@
     public CssValue<ColorBuilder>? Color { get; set; }
 
     [Parameter]
-    public Size Size { get; set; } = Size.Default;
+    public CssValue<SizeBuilder>? Size { get; set; } = Size.Default;
 
     [Parameter]
     public EventCallback<bool> CheckedChanged { get; set; }
